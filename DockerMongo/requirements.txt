@@ -1,2 +1,6 @@
 flask
 pymongo
+arrow
+nose
+pep8
+autopep8
