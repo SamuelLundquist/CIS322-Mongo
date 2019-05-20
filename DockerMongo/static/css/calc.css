@@ -32,6 +32,11 @@ td:active
 	background-color: rgb(175, 191, 216);
 }
 
+#table
+{
+	width: 100%;
+}
+
 .brevButton
 {
 	width:35%;
