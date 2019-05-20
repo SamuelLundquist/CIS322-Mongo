@@ -85,7 +85,6 @@
 	<th>Location</th>
 	<th>Open</th>
 	<th>Close</th>
-	<th>Notes</th>
       </tr>
    {% for row in range(20) %}
     <tr class="control">
@@ -103,8 +102,6 @@
       <td><input name="open" type="datetime" value="" readonly /></td>
       <!-- Close time (read only, set by JavaScript function -->
       <td><input name="close" type="datetime" value="" readonly /></td>
-      <!-- Notes (error messages for this row) -->
-      <td class="notes"> &nbsp; </td>
     </tr>
     {% endfor %}
   </table>
@@ -114,6 +111,7 @@
 
 <div id='buttons'>
   <button class='brevButton' id='submit' onclick="submit()">Submit</button>
+  <div id="divider"></div>
   <button class='brevButton' id='display' onclick="location.href='/display'">Display</button>
 </div>
 
@@ -138,11 +136,11 @@
     $.getJSON(TIME_CALC_URL, { km: km, dt: dt, bv: bv }, 
       // response handler
       function(data) {
-         var times = data.result;
-         console.log("Got a response: " +  times);
-         console.log("Response.open = " + times.open);
-         open_time_field.val( moment(times.open).format("ddd M/D H:mm"));
-         close_time_field.val( moment(times.close).format("ddd M/D H:mm"));
+        var times = data.result;
+        console.log("Got a response: " +  times);
+        console.log("Response.open = " + times.open);
+        open_time_field.val( moment(times.open).format("ddd M/D H:mm"));
+        close_time_field.val( moment(times.close).format("ddd M/D H:mm"));
        } // end of handler function
      );// End of getJSON
     }
