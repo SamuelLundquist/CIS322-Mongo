@@ -1,0 +1,23 @@
+body
+{
+	width: 100%;
+	height: auto;
+	background-color: rgb(50,50,50);
+
+}
+
+.time
+{
+	width: 30%;
+	padding: 20px;
+	height: 120px;
+	margin: 40px auto;
+	background-color: white;
+	border-radius: 5px;
+}
+
+h1
+{
+	color: rgb(53, 80, 122);
+	font-size: 30px;
+}

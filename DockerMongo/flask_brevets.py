@@ -25,12 +25,11 @@ db = client.brevetsdb
 ###
 # Pages
 ###
-
 @app.route("/")
 @app.route("/index")
 def index():
     app.logger.debug("Main page entry")
-    return render_template('calc.html')
+    return render_template('calc.html'), 200
 
 @app.route("/<filepath>")
 def found(filepath):
@@ -41,25 +40,16 @@ def found(filepath):
     else:
         return render_template('404.html'), 404
 
-@app.errorhandler(404)
-def page_not_found(error):
-    app.logger.debug("Page not found")
-    flask.session['linkback'] = flask.url_for("index")
-    return render_template('404.html'), 404
+@app.route("/display")
+def display():
+    app.logger.debug("Display page entry")
+    _times = db.brevetsdb.find()
+    times = [time for time in _times]
+    return render_template('display.html', times=times), 200
 
-@app.errorhandler(403)
-def forbidden_request(error):
-    app.logger.debug("Forbidden request")
-    flask.session['linkback'] = flask.url_for("index")
-    return render_template('403.html'), 403
-
-
-###############
-#
+###
 # AJAX request handlers
-#   These return JSON, rather than rendering pages.
-#
-###############
+###
 @app.route("/_calc_times")
 def _calc_times():
     """
@@ -73,15 +63,43 @@ def _calc_times():
     brev = request.args.get('bv', type=float)
     app.logger.debug("km={}".format(km))
     app.logger.debug("request.args: {}".format(request.args))
-    # FIXME: These probably aren't the right open and close times
-    # and brevets may be longer than 200km
     open_time = acp_times.open_time(km, brev, date)
     close_time = acp_times.close_time(km, brev, date)
     result = {"open": open_time, "close": close_time}
     return flask.jsonify(result=result)
 
+@app.route("/_submit", methods=['POST'])
+def submit():
+    app.logger.debug("Got a JSON request")
+    distance = request.args.get("d")
+    name = request.args.get("n")
+    openTime = request.args.get("o")
+    closeTime = request.args.get("c")
+    time_doc = {
+        'dist': distance,
+        'name': name,
+        'open': openTime,
+        'close':closeTime
+    }
+    db.brevetsdb.insert_one(time_doc)
+    return flask.jsonify()
+    
+###
+# Error Handlers
+###
+@app.errorhandler(404)
+def page_not_found(error):
+    app.logger.debug("Page not found")
+    flask.session['linkback'] = flask.url_for("index")
+    return render_template('404.html'), 404
 
-#############
+@app.errorhandler(403)
+def forbidden_request(error):
+    app.logger.debug("Forbidden request")
+    flask.session['linkback'] = flask.url_for("index")
+    return render_template('403.html'), 403
+
+###############
 
 app.debug = CONFIG.DEBUG
 if app.debug:

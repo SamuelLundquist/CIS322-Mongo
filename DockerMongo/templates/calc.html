@@ -78,7 +78,7 @@
   -->
   <div class="row">
   <div class="col-md-12"> 
-  <table class="control_time_table">
+  <table class="control_time_table" id="table">
       <tr>
 	<th> Miles </th>
 	<th> Km </th>
@@ -113,14 +113,15 @@
 </form>
 
 <div id='buttons'>
-  <button class='brevButton' id='submit'>Submit</button>
-  <button class='brevButton' id='display'>Display</button>
+  <button class='brevButton' id='submit' onclick="submit()">Submit</button>
+  <button class='brevButton' id='display' onclick="location.href='/display'">Display</button>
 </div>
 
 <script type="text/javascript">
 
   var SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
+  var SUBMIT_URL = SCRIPT_ROOT + "/_submit";
 
   // Pass calctimes a <td> element containing the data for a control.
   // It extracts the distance and calls the server to get times to
@@ -131,8 +132,6 @@
     var km = control.find("input[name='km']").val();
     var dt = $("#begin_date").val() + 'T' +  $("#begin_time").val();
     var bv = $("#brevet_dist_km").val();
-    console.log(dt);
-    console.log(bv);
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
     
@@ -147,6 +146,30 @@
        } // end of handler function
      );// End of getJSON
     }
+
+  function submit() {
+    var tableData = new Array();
+    var i = 0;
+    $('#table tr').each(function(row, tr){  
+      if($(tr).find('td').eq(1).find('input').val() != "" && $(tr).find('td').eq(3).find('input').val() != "Invalid date"){
+        tableData[i] ={
+          "d": $(tr).find('td').eq(1).find('input').val(),
+          "n": $(tr).find('td').eq(2).find('input').val(),
+          "o": $(tr).find('td').eq(3).find('input').val(),
+          "c": $(tr).find('td').eq(4).find('input').val()
+        }
+        i++;
+      }
+    });
+    tableData.shift();
+    console.log(tableData);
+    for (var x = 0; x < i-1; x++){
+      $.getJSON(SUBMIT_URL, tableData[x],
+        function() {
+          console.log("Sumbit request");
+        });
+    }
+  }
 
   $(document).ready(function(){
    // Do the following when the page is finished loading

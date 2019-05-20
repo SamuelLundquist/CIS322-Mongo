@@ -1,4 +1,4 @@
 FROM python:3
-ADD . /todo
-WORKDIR /todo
+ADD . /brevets
+WORKDIR /brevets
 RUN pip install -r requirements.txt
