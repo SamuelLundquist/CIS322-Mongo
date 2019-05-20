@@ -68,7 +68,7 @@ def _calc_times():
     result = {"open": open_time, "close": close_time}
     return flask.jsonify(result=result)
 
-@app.route("/_submit", methods=['POST'])
+@app.route("/_submit")
 def submit():
     app.logger.debug("Got a JSON request")
     distance = request.args.get("d")
@@ -81,7 +81,9 @@ def submit():
         'open': openTime,
         'close':closeTime
     }
+    app.logger.debug("Inserting...")
     db.brevetsdb.insert_one(time_doc)
+    app.logger.debug("success")
     return flask.jsonify()
     
 ###
