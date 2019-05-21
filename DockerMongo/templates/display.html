@@ -8,14 +8,16 @@
 	</head>
 
 	<body>
-
-		{% for time in times %}
-		<div class='time'>
-  			<h1>{{ time.name }} {{ time.dist }}km</h1>
-  			<p>Opens: {{ time.open }}</p>
- 			<p>Closes: {{ time.close}}</p>
+		<div id=title>Brevet Times</div>
+		<div id='times'>
+			{% for time in times %}
+			<div class='time'>
+  				<div class='titleline'>{{ time.name }} {{ time.dist }}km</div>
+  				<div class='line'>Opens: {{ time.open }}</div>
+ 				<div class='line'>Closes: {{ time.close }}</div>
+			</div>
+			{% endfor %}
 		</div>
-		{% endfor %}
 
 	</body>
 
