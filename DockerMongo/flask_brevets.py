@@ -3,11 +3,8 @@ Replacement for RUSA ACP brevet time calculator
 (see https://rusa.org/octime_acp.html)
 
 """
-
-import flask
-from flask import request, redirect, url_for, render_template
+from flask import request, redirect, url_for, render_template, Flask, jsonify, session
 from pymongo import MongoClient
-import pymongo
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
 import config
@@ -17,7 +14,7 @@ import os
 ###
 # Globals
 ###
-app = flask.Flask(__name__)
+app = Flask(__name__)
 CONFIG = config.configuration()
 app.secret_key = CONFIG.SECRET_KEY
 client = MongoClient(os.environ['DB_PORT_27017_TCP_ADDR'], 27017)
@@ -58,21 +55,23 @@ def _calc_times():
     described at https://rusa.org/octime_alg.html.
     Expects one URL-encoded argument, the number of miles.
     """
-    app.logger.debug("Got a JSON request")
+    app.logger.debug("Got a JSON request: Calculate Times")
     km = request.args.get('km', 999, type=float)
     date = request.args.get('dt', type=str)
     brev = request.args.get('bv', type=float)
-    app.logger.debug("km={}".format(km))
-    app.logger.debug("request.args: {}".format(request.args))
     open_time = acp_times.open_time(km, brev, date)
     close_time = acp_times.close_time(km, brev, date)
     result = {"open": open_time, "close": close_time}
-    return flask.jsonify(result=result)
+    return jsonify(result=result)
 
 @app.route("/_submit")
 def submit():
-    app.logger.debug("Got a JSON request")
-    distance = request.args.get("d")
+    """
+    Adds an ACP-sanctioned brevet to database
+    if it doesn't already exist
+    """
+    app.logger.debug("Got a JSON request: Submit")
+    distance = float(request.args.get("d"))
     name = request.args.get("n")
     openTime = request.args.get("o")
     closeTime = request.args.get("c")
@@ -82,11 +81,8 @@ def submit():
         "op": openTime,
         "cl": closeTime
     }
-    app.logger.debug("Inserting...")
     db.brevetsdb.update({ "dist": distance }, time_doc, True);
-    #db.brevetsdb.insert_one(time_doc)
-    app.logger.debug("success")
-    return flask.jsonify()
+    return jsonify()
     
 ###
 # Error Handlers
@@ -94,13 +90,13 @@ def submit():
 @app.errorhandler(404)
 def page_not_found(error):
     app.logger.debug("Page not found")
-    flask.session['linkback'] = flask.url_for("index")
+    session['linkback'] = flask.url_for("index")
     return render_template('404.html'), 404
 
 @app.errorhandler(403)
 def forbidden_request(error):
     app.logger.debug("Forbidden request")
-    flask.session['linkback'] = flask.url_for("index")
+    session['linkback'] = flask.url_for("index")
     return render_template('403.html'), 403
 
 ###############
