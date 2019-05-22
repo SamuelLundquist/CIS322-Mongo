@@ -7,6 +7,7 @@ Replacement for RUSA ACP brevet time calculator
 import flask
 from flask import request, redirect, url_for, render_template
 from pymongo import MongoClient
+import pymongo
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
 import config
@@ -43,7 +44,7 @@ def found(filepath):
 @app.route("/display")
 def display():
     app.logger.debug("Display page entry")
-    _times = db.brevetsdb.find()
+    _times = db.brevetsdb.find().sort( "dist", 1)
     times = [time for time in _times]
     return render_template('display.html', times=times), 200
 
@@ -76,13 +77,14 @@ def submit():
     openTime = request.args.get("o")
     closeTime = request.args.get("c")
     time_doc = {
-        'dist': distance,
-        'name': name,
-        'open': openTime,
-        'close':closeTime
+        "dist": distance,
+        "nm": name,
+        "op": openTime,
+        "cl": closeTime
     }
     app.logger.debug("Inserting...")
-    db.brevetsdb.insert_one(time_doc)
+    db.brevetsdb.update({ "dist": distance }, time_doc, True);
+    #db.brevetsdb.insert_one(time_doc)
     app.logger.debug("success")
     return flask.jsonify()
     
