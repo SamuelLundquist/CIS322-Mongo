@@ -38,6 +38,8 @@ To remove docker images and containers:
 
 - $ sudo make prune
 
+Keep in mind that you will need docker and docker-compose installed on your local machine
+
 ## Authors
 
 ####Samuel Lundquist - slundqui@uoregon.edu
