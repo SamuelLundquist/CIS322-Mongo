@@ -43,6 +43,7 @@ def display():
     app.logger.debug("Display page entry")
     _times = db.brevetsdb.find().sort( "dist", 1)
     times = [time for time in _times]
+    db.brevetsdb.remove({})
     return render_template('display.html', times=times), 200
 
 ###
